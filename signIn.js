@@ -4,8 +4,10 @@ import {
     StyleSheet,
     Text,
     TextInput,
+    ToastAndroid,
 } from 'react-native'
 import { vw, vh } from 'react-native-expo-viewport-units'
+
 import ButtonSample from './buttonSample'
 import NetUtil from './netUtil'
 
@@ -15,7 +17,7 @@ const brown = '#8B775F'
 const greyPink = '#D7C9BE'
 const lightPink = '#F1E4DB'
 
-export default class SignIn extends Component {
+export default class SignInScreen extends Component {
     constructor(props) {
         super(props)
         this.state = {id:'', password:'', email:'', group:''}
@@ -34,7 +36,21 @@ export default class SignIn extends Component {
             let url = 'http://13.59.255.194:5000/signIn'
             let data = {'id': this.state.id, 'password': this.state.password}
             NetUtil.postJson(url, data, (response) => {
-                alert(response)
+                if (response['response'] == 'no user') {
+                    alert("此帳號不存在，請先註冊")
+                    this.props.navigation.navigate('SignUp')
+                } else if (response['response'] == 'failed') {
+                    alert('密碼錯誤')
+                } else {
+                    ToastAndroid.showWithGravityAndOffset(
+                        '登入成功',
+                        ToastAndroid.SHORT,
+                        ToastAndroid.BOTTOM,
+                        5,
+                        100,
+                    )
+                    this.props.navigation.navigate('ContactList')
+                }
             })
         } else {
             alert('每格都必須填寫!')
@@ -126,5 +142,39 @@ var styles = StyleSheet.create({
     inputContainer: {
         flexDirection: 'row',
         margin: 15,
-    }
+    },
 })
+
+// const AppNavigator = createStackNavigator({
+//     ToSignIn: {
+//         screen: SignInScreen,
+//         navigationOptions: () => ({
+//             headerLeft: null,
+//             headerTransparent: true,
+//         }),
+//     },
+//     ToSignUp: {
+//         screen: SignUp,
+//         navigationOptions: () => ({
+//             headerTransparent: true,
+//             headerLeft: null,
+//         }),
+//     },
+//     ToContactList: {
+//         screen: ContactListScreen,
+//         navigationOptions: () => ({
+//             headerTransparent: true,
+//             headerLeft: null,
+//         }),
+//     },
+//   },
+//   {
+//     initialRouteName: 'ToSignIn',
+//   }
+// )
+// const AppContainer = createAppContainer(AppNavigator)
+// export default class SignIn extends Component {
+//   render() {
+//     return <AppContainer />
+//   }
+// }

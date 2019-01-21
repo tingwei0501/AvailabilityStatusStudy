@@ -8,10 +8,8 @@ import {
 } from 'react-native'
 
 import { vw, vh } from 'react-native-expo-viewport-units'
-import { createStackNavigator, createAppContainer } from 'react-navigation'
 
 import ButtonSample from './buttonSample'
-import SignIn from './signIn'
 import NetUtil from './netUtil'
 
 const darkGreen = '#657359'
@@ -20,7 +18,7 @@ const brown = '#8B775F'
 const greyPink = '#D7C9BE'
 const lightPink = '#F1E4DB'
 
-class SignUpScreen extends Component {
+export default class SignUpScreen extends Component {
     constructor(props){
       super(props)
       this.state = {id:'', password:'', email:'', group:''}
@@ -51,32 +49,28 @@ class SignUpScreen extends Component {
             let data = {'id': this.state.id, 'password': this.state.password,
                         'email': this.state.email, 'group': this.state.group}
             NetUtil.postJson(url, data, (response) => {
-                alert(response)
+                if (response['response'] == 'failed') {
+                    /* id already exist */
+                    alert(id+" 已存在，請註冊新帳號")
+                } else {
+                    alert(id+" 註冊成功")
+                    this.props.navigation.navigate('SignIn')
+                }
             })
-            this.props.navigation.navigate('SignIn')
         } else {
             alert('每格都必須填寫!!')
         }
-        
-        // fetch(url, {
-        //     method: 'POST', 
-        //     body: JSON.stringify(data),
-        //     headers:{
-        //       'Content-Type': 'application/json'
-        //     }
-        // }).then((response) => {
-        //     console.log(this.state.id, "sing up successfully!");
-             
-        // }).catch((err) => {
-        //     console.log('錯誤:', err);
-        // });
     }
     _onPressIdCheck = () => {
         let url = 'http://13.59.255.194:5000/idCheck'
         let data = {'id': this.state.id}
-        NetUtil.postJson(url, data, (response) => {
-            alert(response)
-        })
+        if (this.state.id != '') {
+            NetUtil.postJson(url, data, (response) => {
+                alert(response['response'])
+            })
+        } else {
+            alert("請輸入帳號")
+        }
     }
     render () {
         return (
@@ -197,26 +191,3 @@ var styles = StyleSheet.create({
         color: darkGreen,
     }
 })
-const AppNavigator = createStackNavigator({
-    SignUp: {
-        screen: SignUpScreen,
-        navigationOptions: () => ({
-            headerLeft: null,
-            headerTransparent: true,
-        }),
-    },
-    SignIn: {
-        screen: SignIn,
-        navigationOptions: () => ({
-            headerTransparent: true,
-            headerLeft: null,
-        }),
-    },
-  }
-)
-const AppContainer = createAppContainer(AppNavigator)
-export default class SignUp extends Component {
-  render() {
-    return <AppContainer />
-  }
-}

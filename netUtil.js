@@ -8,9 +8,9 @@ let netUtil = {
             body: JSON.stringify(data),
         };
         fetch(url, fetchOptions)
-        .then((response) => response.text())
-        .then((responseText) => {
-            callback(responseText);
+        .then((response) => response.json())
+        .then((responseJson) => {
+            callback(responseJson);
         }).catch((err) => {
             console.log('錯誤:', err);
         });
