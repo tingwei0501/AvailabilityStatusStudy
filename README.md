@@ -1,1 +1,2 @@
 # AvailabilityStatusStudy
+React Native application
