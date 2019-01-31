@@ -19,9 +19,14 @@ const greyPink = '#D7C9BE'
 const lightPink = '#F1E4DB'
 
 export default class SignUpScreen extends Component {
-    constructor(props){
-      super(props)
-      this.state = {id:'', password:'', email:'', group:''}
+    constructor(props) {
+        super(props)
+        this.state = {
+            id: '', 
+            password: '', 
+            email: '', 
+            group: ''
+        }
     }
     handleId = (id) => {
         console.log(id)
@@ -39,7 +44,7 @@ export default class SignUpScreen extends Component {
         console.log(group)
         this.setState({ group: group })
     }
-    _onPressButton = () => {
+    _onPressButton = (e) => {
         id = this.state.id
         password = this.state.password
         email = this.state.email
@@ -61,19 +66,19 @@ export default class SignUpScreen extends Component {
             alert('每格都必須填寫!!')
         }
     }
-    _onPressIdCheck = () => {
+    _onPressIdCheck = (e) => {
         let url = 'http://13.59.255.194:5000/idCheck'
         let data = {'id': this.state.id}
         if (this.state.id != '') {
             NetUtil.postJson(url, data, (response) => {
-                alert(response['response'])
+                alert(response.response)
             })
         } else {
             alert("請輸入帳號")
         }
     }
-    render () {
-        return (
+    render() {
+        return(
             <View style = {styles.container}>
                 <View style = {styles.upper}>
                     <View style = {styles.unitView}>
@@ -91,7 +96,8 @@ export default class SignUpScreen extends Component {
                         />
                         <TouchableOpacity
                             style = {styles.idCheck}
-                            onPress = {this._onPressIdCheck}>
+                            onPress = {this._onPressIdCheck.bind(this)}
+                            onPress = {e=>this._onPressIdCheck(e)}>
                             <Text style = {styles.idCheckText}> 確認帳號 </Text>
                         </TouchableOpacity>
                         
@@ -135,7 +141,8 @@ export default class SignUpScreen extends Component {
                 <View style={styles.lower}>
                     <ButtonSample 
                         title = "確認"
-                        onPress = {this._onPressButton}/>
+                        onPress = {this._onPressButton.bind(this)}
+                        onPress = {e=>this._onPressButton(e)}/>
                 </View>
             </View>
         )
@@ -177,8 +184,7 @@ var styles = StyleSheet.create({
         width: vw(45),
         fontSize: 20,
         marginLeft: 3,
-        color: 'white',
-        
+        color: 'white', 
     },
     idCheck: {
         backgroundColor: lightGreen,

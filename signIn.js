@@ -20,7 +20,12 @@ const lightPink = '#F1E4DB'
 export default class SignInScreen extends Component {
     constructor(props) {
         super(props)
-        this.state = {id:'', password:'', email:'', group:''}
+        this.state = {
+            id: '', 
+            password: '', 
+            email: '', 
+            group: ''
+        }
     }
     handleId  = (id) => {
         this.setState({ id: id })
@@ -29,7 +34,7 @@ export default class SignInScreen extends Component {
         console.log(pwd)
         this.setState({ password: pwd })
     }
-    _onPressButton = () => {
+    _onPressButton = (e) => {
         id = this.state.id
         password = this.state.password
         if (id != '' && password != '') {
@@ -49,25 +54,14 @@ export default class SignInScreen extends Component {
                         5,
                         100,
                     )
-                    this.props.navigation.navigate('ContactList')
+                    this.props.navigation.navigate('ContactList',{
+                        id: id,
+                    })
                 }
             })
         } else {
             alert('每格都必須填寫!')
         }
-        
-        // fetch(url, {
-        //     method: 'POST', 
-        //     body: JSON.stringify(data),
-        //     headers:{
-        //       'Content-Type': 'application/json'
-        //     }
-        // }).then((response) => {
-        //     console.log(response.json());
-             
-        // }).catch((err) => {
-        //     console.log('錯誤:', err);
-        // });
     }
     render() {
         return(
@@ -101,7 +95,8 @@ export default class SignInScreen extends Component {
                 <View style={styles.lower}>
                     <ButtonSample 
                         title = "登入"
-                        onPress = {this._onPressButton}/>
+                        onPress = {this._onPressButton.bind(this)}
+                        onPress = {e=>this._onPressButton(e)}/>
                         
                 </View>
             </View>

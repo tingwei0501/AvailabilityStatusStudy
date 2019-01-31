@@ -8,8 +8,8 @@ import {
 
 export default class buttonSample extends Component {
 
-  render () {
-    let {onPress, title} = this.props;
+  render() {
+    let {onPress, title} = this.props
     return (
       <View style={styles.center}>
         <TouchableOpacity 

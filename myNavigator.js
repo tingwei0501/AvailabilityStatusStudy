@@ -4,6 +4,12 @@ import SignInScreen from './signIn'
 import ContactListScreen from './contactList'
 import HomeScreen from './home'
 
+const darkGreen = '#657359'
+const lightGreen = '#9AA582'
+const brown = '#8B775F'
+const greyPink = '#D7C9BE'
+const lightPink = '#F1E4DB'
+
 const RootStack = createStackNavigator({
     Home: {
         screen: HomeScreen,
@@ -29,7 +35,12 @@ const RootStack = createStackNavigator({
         screen: ContactListScreen,
         navigationOptions: () => ({
             headerLeft: null,
-            headerTransparent: true,
+            title: '聯絡人列表',
+            headerTintColor: darkGreen,
+            headerStyle: {
+                backgroundColor: lightGreen
+            },
+            // headerTransparent: true,
         })
     },
   },

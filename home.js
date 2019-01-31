@@ -9,10 +9,10 @@ export default class HomeScreen extends Component {
     constructor(props) {
       super(props)
     }
-    _onPressSignUp = () => {
+    _onPressSignUp = (e) => {
         this.props.navigation.navigate('SignUp')
     }
-    _onPressSignIn = () => {
+    _onPressSignIn = (e) => {
         this.props.navigation.navigate('SignIn')
     }
     render() {
@@ -22,12 +22,14 @@ export default class HomeScreen extends Component {
             <View style = {styles.buttonContainer}>
                 <ButtonSample 
                 title="註冊"
-                onPress = {this._onPressSignUp}/>
+                onPress = {this._onPressSignUp.bind(this)}
+                onPress = {e=>this._onPressSignUp(e)}/>
             </View>
             <View style = {styles.buttonContainer}>
                 <ButtonSample 
                 title="登入"
-                onPress = {this._onPressSignIn}/>
+                onPress = {this._onPressSignIn.bind(this)}
+                onPress = {e=>this._onPressSignIn(e)}/>
             </View>
             </View>
       )
