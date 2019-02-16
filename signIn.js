@@ -41,11 +41,23 @@ export default class SignInScreen extends Component {
             let url = 'http://13.59.255.194:5000/signIn'
             let data = {'id': this.state.id, 'password': this.state.password}
             NetUtil.postJson(url, data, (response) => {
-                if (response['response'] == 'no user') {
-                    alert("此帳號不存在，請先註冊")
+                if (response.response == 'no user') {
+                    Alert.alert(
+                        '登入失敗',
+                        '此帳號不存在，請先註冊',
+                        [
+                          {text: '確定', onPress: () => console.log('NO Pressed'), style: 'cancel'},
+                        ]
+                    )
                     this.props.navigation.navigate('SignUp')
-                } else if (response['response'] == 'failed') {
-                    alert('密碼錯誤')
+                } else if (response.response == 'failed') {
+                    Alert.alert(
+                        '登入失敗',
+                        '密碼錯誤',
+                        [
+                          {text: '確定', onPress: () => console.log('NO Pressed'), style: 'cancel'},
+                        ]
+                    )
                 } else {
                     ToastAndroid.showWithGravityAndOffset(
                         '登入成功',
@@ -54,13 +66,19 @@ export default class SignInScreen extends Component {
                         5,
                         100,
                     )
-                    this.props.navigation.navigate('ContactList',{
+                    this.props.navigation.navigate('ContactList', {
                         id: id,
                     })
                 }
             })
         } else {
-            alert('每格都必須填寫!')
+            Alert.alert(
+                '登入失敗',
+                '每格都必須填寫!',
+                [
+                  {text: '確定', onPress: () => console.log('NO Pressed'), style: 'cancel'},
+                ]
+            )
         }
     }
     render() {
@@ -96,7 +114,7 @@ export default class SignInScreen extends Component {
                     <ButtonSample 
                         title = "登入"
                         onPress = {this._onPressButton.bind(this)}
-                        onPress = {e=>this._onPressButton(e)}/>
+                        onPress = {e => this._onPressButton(e)}/>
                         
                 </View>
             </View>
@@ -139,37 +157,3 @@ var styles = StyleSheet.create({
         margin: 15,
     },
 })
-
-// const AppNavigator = createStackNavigator({
-//     ToSignIn: {
-//         screen: SignInScreen,
-//         navigationOptions: () => ({
-//             headerLeft: null,
-//             headerTransparent: true,
-//         }),
-//     },
-//     ToSignUp: {
-//         screen: SignUp,
-//         navigationOptions: () => ({
-//             headerTransparent: true,
-//             headerLeft: null,
-//         }),
-//     },
-//     ToContactList: {
-//         screen: ContactListScreen,
-//         navigationOptions: () => ({
-//             headerTransparent: true,
-//             headerLeft: null,
-//         }),
-//     },
-//   },
-//   {
-//     initialRouteName: 'ToSignIn',
-//   }
-// )
-// const AppContainer = createAppContainer(AppNavigator)
-// export default class SignIn extends Component {
-//   render() {
-//     return <AppContainer />
-//   }
-// }

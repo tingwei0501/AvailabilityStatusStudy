@@ -11,11 +11,11 @@ export default class buttonSample extends Component {
   render() {
     let {onPress, title} = this.props
     return (
-      <View style={styles.center}>
+      <View style = {styles.center}>
         <TouchableOpacity 
-          style={styles.button}
-          onPress={onPress}>
-          <Text style={styles.buttonText}> {title} </Text>
+          style = {styles.button}
+          onPress = {onPress}>
+          <Text style = {styles.buttonText}> {title} </Text>
         </TouchableOpacity>
       </View>
     )

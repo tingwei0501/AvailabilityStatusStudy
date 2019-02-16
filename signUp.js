@@ -5,6 +5,7 @@ import {
   View,
   TextInput,
   TouchableOpacity,
+  Alert,
 } from 'react-native'
 
 import { vw, vh } from 'react-native-expo-viewport-units'
@@ -56,14 +57,32 @@ export default class SignUpScreen extends Component {
             NetUtil.postJson(url, data, (response) => {
                 if (response['response'] == 'failed') {
                     /* id already exist */
-                    alert(id+" 已存在，請註冊新帳號")
+                    Alert.alert(
+                        '註冊失敗',
+                        id+' 已存在，請註冊新帳號',
+                        [
+                          {text: '確定', onPress: () => console.log('NO Pressed'), style: 'cancel'},
+                        ]
+                    )
                 } else {
-                    alert(id+" 註冊成功")
+                    Alert.alert(
+                        '註冊成功',
+                        id+' 註冊成功',
+                        [
+                          {text: '確定', onPress: () => console.log('NO Pressed'), style: 'cancel'},
+                        ]
+                    )
                     this.props.navigation.navigate('SignIn')
                 }
             })
         } else {
-            alert('每格都必須填寫!!')
+            Alert.alert(
+                '註冊失敗',
+                '每格都必須填寫!',
+                [
+                  {text: '確定', onPress: () => console.log('NO Pressed'), style: 'cancel'},
+                ]
+            )
         }
     }
     _onPressIdCheck = (e) => {
@@ -71,10 +90,32 @@ export default class SignUpScreen extends Component {
         let data = {'id': this.state.id}
         if (this.state.id != '') {
             NetUtil.postJson(url, data, (response) => {
-                alert(response.response)
+                if (response.response=='success') {
+                    Alert.alert(
+                        '通過',
+                        '此帳號可以使用!',
+                        [
+                          {text: '確定', onPress: () => console.log('Pressed'),},
+                        ]
+                    ) 
+                } else if (response.response=='failed'){
+                    Alert.alert(
+                        '失敗',
+                        '帳號已存在，請註冊新帳號!',
+                        [
+                          {text: '確定', onPress: () => console.log('Pressed'),},
+                        ]
+                    ) 
+                } 
             })
         } else {
-            alert("請輸入帳號")
+            Alert.alert(
+                '錯誤',
+                '請輸入帳號!',
+                [
+                  {text: '確定', onPress: () => console.log('Pressed'),},
+                ]
+            )
         }
     }
     render() {
@@ -142,7 +183,7 @@ export default class SignUpScreen extends Component {
                     <ButtonSample 
                         title = "確認"
                         onPress = {this._onPressButton.bind(this)}
-                        onPress = {e=>this._onPressButton(e)}/>
+                        onPress = {e => this._onPressButton(e)}/>
                 </View>
             </View>
         )
