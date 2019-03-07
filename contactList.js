@@ -12,14 +12,16 @@ import {
     Dimensions,
     Switch,
     Alert,
+    Image,
 } from 'react-native'
 import { vw, vh } from 'react-native-expo-viewport-units'
 import PageControl from 'react-native-page-control'
 import Carousel from 'react-native-snap-carousel'
-import { CheckBox } from 'react-native-elements'
+import Realm from 'realm'
 
 import NetUtil from './netUtil'
 import ButtonSample from './buttonSample'
+import MyCheckBox from './myCheckBox'
 
 const { width } = Dimensions.get("window")
 
@@ -29,6 +31,17 @@ const brown = '#8B775F'
 const greyPink = '#D7C9BE'
 const lightPink = '#F1E4DB'
 
+// Define your models and their properties
+const UserSchema = {
+    name: 'User',
+    properties: {
+      name:  'string',
+      image: 'data?',
+    }
+}
+
+let realm = new Realm({schema: [UserSchema,]})
+
 export default class ContactListScreen extends Component {
     constructor(props) {
         super(props)
@@ -36,6 +49,7 @@ export default class ContactListScreen extends Component {
             data: [],
             loaded: false,
             modalVisible: false,
+            Q1ModalVisible: true,
             currentPage: 0,
             /***  Questionnaire 1 */
             pickerValue: '',
@@ -53,6 +67,37 @@ export default class ContactListScreen extends Component {
             noSendReasonOtherText: '',
         }
         this.fetchData = this.fetchData.bind(this)
+    }
+    componentWillMount() {
+        const { navigation } = this.props
+        const id = navigation.getParam('id', 'no-id')
+        this.fetchData(id)
+        
+        // console.log(this.state.data)
+    }
+    _storeToLocal() {
+        let userData = this.state.data
+        // console.log(userData)
+        const iterator = userData.values()
+        let allUser = realm.objects('User')
+        realm.delete(allUser)
+        // for (const value of iterator) {
+        //     // console.log(value['id']) // expected output: "a" "b" "c"
+        //     realm.write(() => {
+        //         realm.create('User', {
+        //             name: value['id'],
+        //             image: value['img'],
+        //         });
+        //     })
+        // }
+        
+    }
+    componentDidMount() {
+        let users = realm.objects('User')
+        // console.log(users)
+        for (let p of users) {
+            console.log(`${p.name}`)
+        }
     }
     _updatePickerValue = (p) => {
         console.log(p)
@@ -73,11 +118,6 @@ export default class ContactListScreen extends Component {
     _updateNoSendReason = (r) => {
         this.setState({ noSendReason: r })
     }
-    componentDidMount() {
-        const { navigation } = this.props
-        const id = navigation.getParam('id', 'no-id')
-        this.fetchData(id)
-    }
     fetchData = (id) => {
         console.log(id+ ' requestData')
         let url = 'http://13.59.255.194:5000/getList'
@@ -89,25 +129,34 @@ export default class ContactListScreen extends Component {
                     data: this.state.data.concat(response.list),
                     loaded: true
                 })
+                this._storeToLocal()
             } else {
                 alert("錯誤")
             }
         })
     }
-    renderItem({item}) {
+    _renderItem({item}) {
+        let img = item.img
+        let id = item.id
         return(
-            <View style = {styles.container}>
+            <View style = {{height: vh(11),}}>
                 <TouchableOpacity
                     onPress = {() => console.log('item pressed')}
                     style = {styles.touchable}>
                     <View style = {styles.touchableInside}>
-                        <Text> {item.id} </Text>
+                        <View style = {{width: vh(11), height: vh(11),}}>
+                            <Image
+                                style = {styles.image}
+                                source = {{uri: 'data:image/png;base64, ' + img}}
+                            />
+                        </View>
+                        <Text style = {styles.name}> {id} </Text>
                     </View>
                 </TouchableOpacity>
             </View>
         )
     }
-    renderLoadingView() {
+    _renderLoadingView() {
         return(
             <View style = {styles.container}>
                 <Text style = {styles.loadingText}>Loading...</Text>
@@ -115,19 +164,19 @@ export default class ContactListScreen extends Component {
         )
     }
     setModalVisible(visible) {
-        this.setState({modalVisible: visible})
+        this.setState({ modalVisible: visible })
+    }
+    setQ1modalVisible(visible) {
+        this.setState({ Q1ModalVisible: visible })
     }
     _onPressButton = (e) => {
         this.setModalVisible(!this.state.modalVisible)
-        // this.setState({ currentPage: 0 })
-        // console.log(this.state.currentPage)
-        // this._carousel.snapToItem(this.state.currentPage)
     }
     isFirstPage() {
         return this.state.currentPage==0
     }
-    isLastPage() {
-        return this.state.currentPage==2
+    isLastPage(item) {
+        return this.state.currentPage==item.length - 1
     }
     _renderUsingPurposeTextInput() {
         return (
@@ -197,34 +246,40 @@ export default class ContactListScreen extends Component {
                 <TouchableOpacity
                     style = {styles.questionnaireButton}
                     onPress = {() => {
-                        // console.log("here"+this.state.usingPurpose)
-                        if (this.state.noSendReasonOther && this.state.noSendReasonOtherText=='') {
-                            Alert.alert(
-                                '錯誤',
-                                '請填寫第三題的其他原因',
-                                [
-                                  {text: '確定', onPress: () => console.log('NO Pressed')},
-                                ]
-                            )
-                        } else if (this.state.pickerValue=='other' && this.state.usingPurpose=='other'){
-                            Alert.alert(
-                                '錯誤',
-                                '請填寫第一題的其他原因',
-                                [
-                                  {text: '確定', onPress: () => console.log('NO Pressed')},
-                                ]
-                            )
-                        } else {
-                            Alert.alert(
-                                '提交成功',
-                                '感謝您填寫問卷!',
-                                [
-                                  {text: 'OK', onPress: () => console.log('NO Pressed')},
-                                ]
-                            )
-                            this.setModalVisible(!this.state.modalVisible)
-                            this.setState({ currentPage: 0 })
-                            this._carousel.snapToItem(this.state.currentPage)
+                        if (this.state.Q1ModalVisible) {
+                            if (this.state.pickerValue=='other' && this.state.usingPurpose=='other') {
+                                Alert.alert(
+                                    '錯誤',
+                                    '請填寫其他原因',
+                                    [
+                                        {text: '確定', onPress: () => console.log('NO Pressed')},
+                                    ]
+                                )
+                            } 
+                            else {
+                                this.setQ1modalVisible(!this.state.Q1ModalVisible)
+                            }
+                        } else if (this.state.modalVisible) {
+                            if (this.state.noSendReasonOther && this.state.noSendReasonOtherText=='') {
+                                Alert.alert(
+                                    '錯誤',
+                                    '請填寫其他原因',
+                                    [
+                                      {text: '確定', onPress: () => console.log('NO Pressed')},
+                                    ]
+                                )
+                            } else {
+                                Alert.alert(
+                                    '提交成功',
+                                    '感謝您填寫問卷!',
+                                    [
+                                      {text: 'OK', onPress: () => console.log('NO Pressed')},
+                                    ]
+                                )
+                                this.setModalVisible(!this.state.modalVisible)
+                                this.setState({ currentPage: 0 })
+                                this._carousel.snapToItem(this.state.currentPage)
+                            }
                         }
                     }}>
                     <Text style = {styles.questionnaireNextButtonText}>提交</Text>
@@ -238,28 +293,8 @@ export default class ContactListScreen extends Component {
 
     render() {
         if(!this.state.loaded) {
-            return this.renderLoadingView();
+            return this._renderLoadingView();
         }
-        let Q1 = 
-        <View style = {styles.questionContainer}>
-            <Text style = {styles.subTitle}>1. 請問您使用此App的目的是?</Text>
-            <Picker
-                selectedValue = {this.state.pickerValue}
-                onValueChange = {this._updatePickerValue}
-                style = {styles.purposePicker}>
-                    <Picker.Item label = "要和對方溝通" value = "contact" />
-                    <Picker.Item label = "純粹好奇對方狀態" value = "curious" />
-                    <Picker.Item label = "無聊打發時間" value = "boring" />
-                    <Picker.Item label = "其他" value = "other" />
-            </Picker>
-            <View>
-                {
-                    this.state.pickerValue == 'other'
-                    ? this._renderUsingPurposeTextInput()
-                    : <View/>
-                }
-            </View>
-        </View>
         let Q2 = 
         <View style = {styles.questionContainer}>
             <Text style = {styles.subTitle}>2. 請問您看完對方狀態之後，{'\n'}有傳訊息給他嗎?</Text>
@@ -275,36 +310,28 @@ export default class ContactListScreen extends Component {
         <View style = {styles.questionContainer}>
             <Text style = {styles.subTitle}>3. 請問您沒有傳訊息給對方的原因是?</Text>
             <View style = {{flexDirection: 'row'}}>
-                <CheckBox
-                    size = {15}
-                    checkedColor = {brown}
+                <MyCheckBox
                     containerStyle = {{marginRight: width/100}}
-                    title ='怕打擾到他'
+                    title = '怕打擾到他'
                     checked = {this.state.noSendReasonBother}
                     onPress = {() => this.setState({noSendReasonBother: !this.state.noSendReasonBother})}
                 />
-                <CheckBox
-                    size = {15}
-                    checkedColor = {brown}
-                    title ='覺得他在忙'
+                <MyCheckBox
+                    title = '覺得他在忙'
                     checked = {this.state.noSendReasonBusy}
                     onPress = {() => this.setState({noSendReasonBusy: !this.state.noSendReasonBusy})}
                 />
             </View>
             <View style = {{flexDirection: 'row'}}>
-                <CheckBox
-                    size = {15}
-                    checkedColor = {brown}
+                <MyCheckBox
                     containerStyle = {{marginTop: 0, marginRight: width/100}}
-                    title ='狀態顯示回覆率低'
+                    title = '狀態顯示回覆率低'
                     checked = {this.state.noSendReasonLow}
                     onPress = {() => this.setState({noSendReasonLow: !this.state.noSendReasonLow})}
                 />
-                <CheckBox
-                    size = {15}
-                    checkedColor = {brown}
+                <MyCheckBox
                     containerStyle = {{marginTop: 0}}
-                    title ='其他'
+                    title = '其他'
                     checked = {this.state.noSendReasonOther}
                     onPress = {() => this.setState({noSendReasonOther: !this.state.noSendReasonOther})}
                 />
@@ -333,9 +360,48 @@ export default class ContactListScreen extends Component {
             </View>
         } 
 
-        let stepComponents = [Q1, Q2, Q3]
+        // let stepComponents = [Q1, Q2, Q3]
+        let stepComponents = [Q2, Q3]
         return(
             <View style = {styles.container}>
+                {/* For Q1 */}
+                <Modal
+                    animationType = 'fade'
+                    visible = {this.state.Q1ModalVisible}
+                    transparent = {true}
+                    onRequestClose = {() => {
+                        this.setQ1modalVisible(false)
+                    }}>
+                    <View>
+                        <View style = {styles.Q1Modal}>
+                            <View style = {styles.questionContainer}>
+                                <Text style = {styles.subTitle}>1. 請問您使用此App的目的是?</Text>
+                                <Picker
+                                    selectedValue = {this.state.pickerValue}
+                                    onValueChange = {this._updatePickerValue}
+                                    style = {styles.purposePicker}>
+                                        <Picker.Item label = "要和對方溝通" value = "contact" />
+                                        <Picker.Item label = "純粹好奇對方狀態" value = "curious" />
+                                        <Picker.Item label = "無聊打發時間" value = "boring" />
+                                        <Picker.Item label = "其他" value = "other" />
+                                </Picker>
+                                <View>
+                                    {
+                                        this.state.pickerValue == 'other'
+                                        ? this._renderUsingPurposeTextInput()
+                                        : <View/>
+                                    }
+                                </View>
+                            </View>
+                            <View style = {{marginTop: 10,}}>
+                                {
+                                    this._renderSubmitButton()
+                                }
+                            </View>
+                        </View>                        
+                    </View>
+                </Modal>
+                {/* For Q2-Q3 */}
                 <Modal
                     animationType = 'fade'
                     visible = {this.state.modalVisible}
@@ -390,7 +456,7 @@ export default class ContactListScreen extends Component {
                                     : this._renderBackButton()
                                 }
                                 {
-                                    this.isLastPage()
+                                    this.isLastPage(stepComponents)
                                     ? this._renderSubmitButton()
                                     : this._renderNextButton()
                                 }
@@ -400,7 +466,7 @@ export default class ContactListScreen extends Component {
                 </Modal>
                 <FlatList
                     data = {this.state.data}
-                    renderItem = {this.renderItem}
+                    renderItem = {this._renderItem}
                     keyExtractor = {item => item.id}
                     style = {styles.list}/>
                 <ButtonSample 
@@ -427,6 +493,17 @@ var styles = StyleSheet.create({
         marginLeft: vw(10),
         flex: 0,
     },
+    Q1Modal: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'white',
+        borderRadius: 15,
+        width: vw(80),
+        height: vh(30),
+        marginTop: vh(20),
+        marginLeft: vw(10),
+        flex: 0,
+    },
     questionButtonContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -439,13 +516,19 @@ var styles = StyleSheet.create({
     list: {
         paddingTop: 5,
     },
+    image: {
+        marginLeft: 10,
+        width: vh(9),
+        height: vh(11),
+        resizeMode: 'cover',
+    },
     touchable: {
         height: 70,
         width: vw(100),
     },
     touchableInside: {
-        flex: 1, 
-        justifyContent: 'center', 
+        flexDirection: 'row',
+        flex: 1,  
         alignItems: 'center',
         backgroundColor: lightPink, 
         overflow: 'hidden',
@@ -466,6 +549,11 @@ var styles = StyleSheet.create({
     },
     subTitle: {
         marginTop: 20,
+    },
+    name: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginLeft: 20,
     },
     input: {
         width: vw(45),
