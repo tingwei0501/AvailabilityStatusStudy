@@ -6,11 +6,14 @@ import {
     TextInput,
     ToastAndroid,
     Alert,
+    AsyncStorage,
 } from 'react-native'
 import { vw, vh } from 'react-native-expo-viewport-units'
 
 import ButtonSample from './buttonSample'
 import NetUtil from './netUtil'
+
+const KEY = "@Route:initialPage"
 
 const darkGreen = '#657359'
 const lightGreen = '#9AA582'
@@ -37,6 +40,7 @@ export default class SignInScreen extends Component {
     }
     _onPressButton = (e) => {
         id = this.state.id
+        console.log(id+' sign in')
         password = this.state.password
         if (id != '' && password != '') {
             let url = 'http://13.59.255.194:5000/signIn'
@@ -67,6 +71,11 @@ export default class SignInScreen extends Component {
                         5,
                         100,
                     )
+                    AsyncStorage.multiSet([
+                        [KEY, 'alreadyLogin'],
+                        ['loginId', id],
+                        ['loginPwd', password],
+                    ])
                     this.props.navigation.navigate('ContactList', {
                         id: id,
                     })
@@ -114,7 +123,7 @@ export default class SignInScreen extends Component {
                 <View style={styles.lower}>
                     <ButtonSample 
                         title = "登入"
-                        onPress = {this._onPressButton.bind(this)}
+                        // onPress = {this._onPressButton.bind(this)}
                         onPress = {e => this._onPressButton(e)}/>
                         
                 </View>

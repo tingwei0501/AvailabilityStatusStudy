@@ -11,4 +11,4 @@ export default class App extends Component {
   }
 }
 
-AppRegistry.registerComponent('AwesomeProject', () => App)
+AppRegistry.registerComponent('AvailabilityStatusStudy', () => App)

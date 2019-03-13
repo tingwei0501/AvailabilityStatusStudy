@@ -13,6 +13,7 @@ import {
     Switch,
     Alert,
     Image,
+    ActivityIndicator,
 } from 'react-native'
 import { vw, vh } from 'react-native-expo-viewport-units'
 import PageControl from 'react-native-page-control'
@@ -40,12 +41,13 @@ const UserSchema = {
     }
 }
 
-let realm = new Realm({schema: [UserSchema,]})
+// let realm = new Realm({schema: [UserSchema,]})
 
 export default class ContactListScreen extends Component {
     constructor(props) {
         super(props)
         this.state = {
+            id: '',
             data: [],
             loaded: false,
             modalVisible: false,
@@ -69,18 +71,21 @@ export default class ContactListScreen extends Component {
         this.fetchData = this.fetchData.bind(this)
     }
     componentWillMount() {
-        const { navigation } = this.props
-        const id = navigation.getParam('id', 'no-id')
-        this.fetchData(id)
+        // const { navigation } = this.props
+        // const id = navigation.getParam('id', 'no-id')
+        // this.fetchData(id)
+        // console.log('id: '+this.state.id)
+        // if (this.state.id=='') {
+        //     this.props.navigation.navigate('Home')
+        // }
+        console.log('in contactList')
+        this.fetchData()
         
-        // console.log(this.state.data)
     }
     _storeToLocal() {
-        let userData = this.state.data
-        // console.log(userData)
-        const iterator = userData.values()
-        let allUser = realm.objects('User')
-        realm.delete(allUser)
+        // const iterator = userData.values()
+        // let allUser = realm.objects('User')
+        // realm.delete(allUser)
         // for (const value of iterator) {
         //     // console.log(value['id']) // expected output: "a" "b" "c"
         //     realm.write(() => {
@@ -93,11 +98,15 @@ export default class ContactListScreen extends Component {
         
     }
     componentDidMount() {
-        let users = realm.objects('User')
+        // let users = realm.objects('User')
         // console.log(users)
-        for (let p of users) {
-            console.log(`${p.name}`)
-        }
+        // for (let p of users) {
+        //     console.log(`${p.name}`)
+        // }
+        // const { navigation } = this.props
+        // let id = navigation.getParam('id', 'no-id')
+        // console.log('in contactList')
+        // this.fetchData()
     }
     _updatePickerValue = (p) => {
         console.log(p)
@@ -118,8 +127,9 @@ export default class ContactListScreen extends Component {
     _updateNoSendReason = (r) => {
         this.setState({ noSendReason: r })
     }
-    fetchData = (id) => {
-        console.log(id+ ' requestData')
+    fetchData = () => {
+        const { navigation } = this.props
+        let id = navigation.getParam('id', 'no-id')
         let url = 'http://13.59.255.194:5000/getList'
         let data = {'id': id}
         NetUtil.postJson(url, data, (response) => {
@@ -127,9 +137,10 @@ export default class ContactListScreen extends Component {
                 /* successfully get list */
                 this.setState({
                     data: this.state.data.concat(response.list),
-                    loaded: true
+                    loaded: true,
+                    id: id,
                 })
-                this._storeToLocal()
+                // this._storeToLocal()
             } else {
                 alert("錯誤")
             }
@@ -139,27 +150,32 @@ export default class ContactListScreen extends Component {
         let img = item.img
         let id = item.id
         return(
-            <View style = {{height: vh(11),}}>
-                <TouchableOpacity
+            <View style = {styles.touchable}>
+                {/* <TouchableOpacity
                     onPress = {() => console.log('item pressed')}
                     style = {styles.touchable}>
-                    <View style = {styles.touchableInside}>
-                        <View style = {{width: vh(11), height: vh(11),}}>
-                            <Image
-                                style = {styles.image}
-                                source = {{uri: 'data:image/png;base64, ' + img}}
-                            />
-                        </View>
-                        <Text style = {styles.name}> {id} </Text>
+                    <View style = {{width: vh(11), height: vh(11),}}>
+                        <Image
+                            style = {styles.image}
+                            source = {{uri: 'data:image/png;base64, ' + img}}
+                        />
                     </View>
-                </TouchableOpacity>
+                    <Text style = {styles.name}> {id} </Text>
+                </TouchableOpacity> */}
+                <View style = {{width: vh(11), height: vh(11),}}>
+                    <Image
+                        style = {styles.image}
+                        source = {{uri: 'data:image/png;base64, ' + img}}
+                    />
+                </View>
+                <Text style = {styles.name}> {id} </Text>
             </View>
         )
     }
     _renderLoadingView() {
         return(
             <View style = {styles.container}>
-                <Text style = {styles.loadingText}>Loading...</Text>
+                <ActivityIndicator size = "large" color = "white" />
             </View>
         )
     }
@@ -171,6 +187,10 @@ export default class ContactListScreen extends Component {
     }
     _onPressButton = (e) => {
         this.setModalVisible(!this.state.modalVisible)
+    }
+    _onPressEditButton = (e) => {
+        console.log('press edit btn')
+        this.props.navigation.navigate('EditProfile')
     }
     isFirstPage() {
         return this.state.currentPage==0
@@ -215,7 +235,6 @@ export default class ContactListScreen extends Component {
         return (
             <View>
                 <TouchableOpacity
-                    style = {styles.questionnaireButton}
                     onPress = {() => {
                         this.setState({currentPage: nextIndex})
                         this._carousel.snapToItem(nextIndex)
@@ -230,7 +249,6 @@ export default class ContactListScreen extends Component {
         return (
             <View>
                 <TouchableOpacity
-                    style = {styles.questionnaireButton}
                     onPress = {() => {
                         this.setState({currentPage: nextIndex})
                         this._carousel.snapToItem(nextIndex)
@@ -244,7 +262,6 @@ export default class ContactListScreen extends Component {
         return (
             <View>
                 <TouchableOpacity
-                    style = {styles.questionnaireButton}
                     onPress = {() => {
                         if (this.state.Q1ModalVisible) {
                             if (this.state.pickerValue=='other' && this.state.usingPurpose=='other') {
@@ -464,6 +481,23 @@ export default class ContactListScreen extends Component {
                         </View>                        
                     </View>
                 </Modal>
+                <View style = {{flexDirection: 'row', height: vh(11), alignItems: 'center', justifyContent:'space-around'}}> 
+                    <Text style = {styles.userText}> 你目前的回覆率 </Text>
+                    <View style = {{width: vw(35)}}>
+                        <Text style = {{fontSize: 20, marginLeft: 3, color: lightPink}}> 55% </Text>
+                    </View>
+                    <View>
+                        <TouchableOpacity
+                            style = {{ backgroundColor: lightGreen,
+                            paddingLeft: 12,
+                            paddingRight: 12,
+                            width: 60,
+                            borderRadius: 6,}}
+                            onPress = {e => this._onPressEditButton(e)}>
+                            <Text style = {{fontSize: 16, color: 'white',}}>編輯{'\n'}狀態</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
                 <FlatList
                     data = {this.state.data}
                     renderItem = {this._renderItem}
@@ -471,7 +505,7 @@ export default class ContactListScreen extends Component {
                     style = {styles.list}/>
                 <ButtonSample 
                     title = "問卷"
-                    onPress = {this._onPressButton.bind(this)}
+                    // onPress = {this._onPressButton.bind(this)}
                     onPress = {e => this._onPressButton(e)}/>
             </View>
         )
@@ -508,9 +542,9 @@ var styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
-    loadingText: {
+    userText: {
         color: lightPink,
-        fontSize: 30,
+        fontSize: 16,
         fontWeight: 'bold',
     },
     list: {
@@ -523,10 +557,7 @@ var styles = StyleSheet.create({
         resizeMode: 'cover',
     },
     touchable: {
-        height: 70,
         width: vw(100),
-    },
-    touchableInside: {
         flexDirection: 'row',
         flex: 1,  
         alignItems: 'center',
@@ -534,6 +565,14 @@ var styles = StyleSheet.create({
         overflow: 'hidden',
         margin: 0.5,
     },
+    // touchableInside: {
+    //     flexDirection: 'row',
+    //     flex: 1,  
+    //     alignItems: 'center',
+    //     backgroundColor: lightPink, 
+    //     overflow: 'hidden',
+    //     margin: 0.5,
+    // },
     purposePicker: {
         marginLeft: 10,
         width: vw(50),

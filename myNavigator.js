@@ -3,6 +3,7 @@ import SignUpScreen from './signUp'
 import SignInScreen from './signIn'
 import ContactListScreen from './contactList'
 import HomeScreen from './home'
+import EditProfileScreen from './editProfile'
 
 const darkGreen = '#657359'
 const lightGreen = '#9AA582'
@@ -43,10 +44,21 @@ const RootStack = createStackNavigator({
             // headerTransparent: true,
         })
     },
+    EditProfile: {
+        screen: EditProfileScreen,
+        navigationOptions: () => ({
+            // headerLeft: null,
+            title: '編輯你的狀態',
+            headerTintColor: darkGreen,
+            headerStyle: {
+                backgroundColor: lightGreen
+            }
+        })
+    },
   },
     {
       initialRouteName: 'Home',
     }
 )
-const AppContainer = createAppContainer(RootStack);
+const AppContainer = createAppContainer(RootStack)
 export default AppContainer

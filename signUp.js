@@ -32,7 +32,7 @@ export default class SignUpScreen extends Component {
     handleId = (id) => {
         console.log(id)
         this.setState({ id: id })
-     }
+    }
     handlePwd = (pwd) => {
         console.log(pwd)
         this.setState({ password: pwd })

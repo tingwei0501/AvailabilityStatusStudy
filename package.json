@@ -7,23 +7,23 @@
     "test": "jest"
   },
   "dependencies": {
-    "react": "16.5.0",
-    "react-native": "0.57.0",
-    "react-native-elements": "^1.0.0",
-    "react-native-expo-viewport-units": "0.0.8",
-    "react-native-gesture-handler": "^1.0.12",
+    "react": "16.6.3",
+    "react-native": "0.58.6",
+    "react-native-elements": "^1.1.0",
+    "react-native-expo-viewport-units": "^0.0.8",
+    "react-native-gesture-handler": "^1.1.0",
     "react-native-page-control": "^1.1.1",
     "react-native-snap-carousel": "^3.7.5",
     "react-native-vector-icons": "^6.3.0",
-    "react-native-viewport-units": "0.0.5",
-    "react-navigation": "^3.0.9",
-    "realm": "^2.23.0"
+    "react-navigation": "^3.3.2",
+    "realm": "^2.24.0"
   },
   "devDependencies": {
-    "babel-jest": "23.6.0",
-    "jest": "23.6.0",
-    "metro-react-native-babel-preset": "0.45.3",
-    "react-test-renderer": "16.5.0"
+    "babel-core": "7.0.0-bridge.0",
+    "babel-jest": "24.3.0",
+    "jest": "24.3.0",
+    "metro-react-native-babel-preset": "0.53.0",
+    "react-test-renderer": "16.6.3"
   },
   "jest": {
     "preset": "react-native"
